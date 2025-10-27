@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Classroom – Faculty</title>
+  <link rel="icon" href="CAMPUS CONNECT.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #f2f4f8;
+      padding: 20px;
+    }
+
+    /* HEADER — matching other dashboards */
+    header {
+      background: linear-gradient(180deg, #20b39a 0%, #17a88a 100%);
+      color: #fff;
+      text-align: center;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    header img.logo {
+      height: 56px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
+    header .title-block {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: left;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    header p {
+      font-size: 13px;
+      margin: 0;
+      opacity: 0.95;
+    }
+
+    /* top-right profile button like other dashboards */
+    .profile-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      color: #18ab91;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Tabs / nav — matches dashboards */
+    .dash-tabs {
+      width: 100%;
+      max-width: 900px;
+      margin: 14px auto 8px;
+    }
+
+    .tabs-bar {
+      background: #198b6f;
+      color: #fff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      color: inherit;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .tab a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .tab:hover {
+      opacity: 0.95;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .tab.active {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* content area */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      margin-bottom: 12px;
+    }
+
+    .list-item {
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fafafa;
+      margin-bottom: 8px;
+    }
+
+    .muted {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      background: #18ab91;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: #18ab91;
+      border: 1px solid #18ab91;
+    }
+
+    .small {
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #18ab91;
+      background: #fff;
+      color: #18ab91;
+      cursor: pointer;
+    }
+
+    .danger {
+      border-color: #d9534f;
+      color: #d9534f;
+    }
+
+    .flex {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .right {
+      margin-left: auto;
+    }
+
+    /* QUESTIONS area - scrollable, shows title */
+    #questionsArea {
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #questionsArea::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #questionsArea::-webkit-scrollbar-thumb {
+      background: #18ab91;
+      border-radius: 6px;
+    }
+
+    .question-title {
+      font-weight: 700;
+      color: #124e40;
+      margin-bottom: 6px;
+    }
+
+    .reply-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .reply-text {
+      background: #fff;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      margin-top: 8px;
+    }
+
+    @media (max-width:880px) {
+      .tabs-bar {
+        gap: 8px;
+        padding: 10px;
+        justify-content: center;
+      }
+
+      header img.logo {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img class="logo" src="CAMPUS CONNECT.png" alt="logo">
+        <div class="title-block">
+          <h1 id="classTitle">Classroom</h1>
+          <p id="classMeta">Loading class info…</p>
+        </div>
+      </div>
+    </div>
+
+    <button id="profileBtn" class="profile-btn" title="Profile">👤</button>
+  </header>
+
+  <!-- Tabs (Settings removed) -->
+  <nav class="dash-tabs" aria-label="Classroom navigation">
+    <div class="tabs-bar" role="tablist">
+      <div class="tab" data-tab="questions">💬 Questions</div>
+      <div class="tab" data-tab="notices">📢 Notices</div>
+      <div class="tab" data-tab="notes">📚 Notes</div>
+      <div class="tab" data-tab="assignments">📝 Assignments</div>
+      <div class="tab" data-tab="submissions">📥 Submissions</div>
+      <div class="tab" data-tab="students">👥 Students</div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Questions (default) -->
+    <section id="sec-questions" class="card" style="display:block;">
+      <h3>💬 Student Questions</h3>
+      <div id="questionsArea">
+        <div class="muted">Loading questions…</div>
+      </div>
+    </section>
+
+    <!-- Notices -->
+    <section id="sec-notices" class="card" style="display:none;">
+      <h3>📢 Post Class Notice</h3>
+      <form id="classNoticeForm" style="margin-top:8px;">
+        <input id="cNoticeTitle" placeholder="Notice title" required>
+        <textarea id="cNoticeMsg" rows="3" placeholder="Write the notice..." required></textarea>
+        <input type="file" id="cNoticeFile" accept="image/*,.pdf">
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn" type="submit">Post Notice</button>
+          <button type="button" id="cancelNotice" class="btn secondary">Reset</button>
+        </div>
+      </form>
+
+      <hr style="margin:12px 0;">
+
+      <h4>Recent Notices</h4>
+      <div id="classNoticesList" style="margin-top:8px;">
+        <div class="muted">Loading notices…</div>
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section id="sec-notes" class="card" style="display:none;">
+      <h3>📚 Class Notes</h3>
+
+      <!-- Upload form -->
+      <form id="notesUploadForm" style="margin-top:8px;">
+        <input id="noteTitle" placeholder="Note title" required>
+        <textarea id="noteDesc" rows="2" placeholder="Short description (optional)"></textarea>
+        <input type="file" id="noteFile" accept="*/*" required>
+        <div class="flex" style="margin-top:8px;">
+          <button class="btn" type="submit">Upload Note</button>
+          <button type="button" id="cancelNoteUpload" class="btn secondary">Reset</button>
+          <div class="right" style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+            <label class="muted" style="margin-right:6px;">Sort:</label>
+            <select id="notesSort">
+              <option value="desc">Newest first</option>
+              <option value="asc">Oldest first</option>
+            </select>
+          </div>
+        </div>
+      </form>
+
+      <hr style="margin:12px 0;">
+      <div id="notesList" style="margin-top:8px;">
+        <div class="muted">Loading notes…</div>
+      </div>
+    </section>
+
+    <!-- Assignments -->
+    <section id="sec-assignments" class="card" style="display:none;">
+      <h3>📝 Create Assignment</h3>
+      <form id="assignmentForm" style="margin-top:8px;">
+        <input id="assignTitle" placeholder="Assignment title" required>
+        <textarea id="assignDesc" rows="3" placeholder="Instructions / description"></textarea>
+        <input type="date" id="assignDue">
+        <input type="file" id="assignFile" accept="image/*,.pdf">
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn" type="submit">Post Assignment</button>
+          <button type="button" id="cancelAssignment" class="btn secondary">Reset</button>
+        </div>
+      </form>
+
+      <hr style="margin:12px 0;">
+      <h4>Assignments (recent)</h4>
+      <div id="assignmentsList" style="margin-top:8px;">
+        <div class="muted">Loading assignments…</div>
+      </div>
+    </section>
+
+    <!-- Submissions -->
+    <section id="sec-submissions" class="card" style="display:none;">
+      <h3>📥 Submissions</h3>
+      <div id="submissionsArea">
+        <div class="muted">Loading submissions…</div>
+      </div>
+    </section>
+
+    <!-- Students -->
+    <section id="sec-students" class="card" style="display:none;">
+      <h3>👥 Joined Students</h3>
+      <div id="studentsArea">
+        <div class="muted">Loading…</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Profile modal (simple reuse) -->
+  <div id="profileModal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:9999;">
+    <div style="background:#fff;padding:18px;border-radius:12px;max-width:420px;width:92%;">
+      <h3 style="color:#18ab91;margin-top:0;">Your Profile</h3>
+      <div id="profileContents">Loading…</div>
+      <div style="margin-top:10px;text-align:right;"><button id="closeProfile" class="btn secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      requireAuth, auth, db, storage,
+      collection, query, where, orderBy, onSnapshot,
+      addDoc, serverTimestamp, sRef, uploadBytesResumable, getDownloadURL,
+      doc, getDoc, getDocs, updateDoc
+    } from "./server.js";
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+
+    // Tab switching
+    $$('[data-tab]').forEach(t => {
+      t.addEventListener('click', () => {
+        const key = t.getAttribute('data-tab');
+        ['questions', 'notices', 'notes', 'assignments', 'submissions', 'students'].forEach(k => {
+          const el = document.getElementById('sec-' + k);
+          if (el) el.style.display = (k === key) ? 'block' : 'none';
+        });
+        $$('[data-tab]').forEach(x => x.classList.toggle('active', x === t));
+      });
+    });
+    // default Questions visible
+    $$('[data-tab]')[0]?.classList.add('active');
+
+    // profile modal
+    $('#profileBtn').addEventListener('click', async () => {
+      profileModal.style.display = 'flex';
+      if (!auth || !auth.currentUser) { profileContents.innerText = 'Not signed in'; return; }
+      try {
+        const snap = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        const p = snap.exists() ? snap.data() : {};
+        profileContents.innerHTML = `
+          <div><strong>Name:</strong> ${p.name || auth.currentUser.displayName || '—'}</div>
+          <div><strong>Email:</strong> ${p.email || auth.currentUser.email || '—'}</div>
+          <div><strong>Role:</strong> ${p.role || '—'}</div>
+          <div style="margin-top:8px;"><strong>Bio:</strong> <div class="muted">${p.bio || ''}</div></div>
+        `;
+      } catch (e) { profileContents.innerText = 'Failed to load profile'; console.error(e); }
+    });
+    $('#closeProfile').addEventListener('click', () => profileModal.style.display = 'none');
+
+    // Class context
+    let me = null, classId = null, classRef = null, classData = null;
+    let notesCache = []; // store notes locally to sort client-side
+    let canReply = false;
+
+    function getParam(name) { return new URLSearchParams(location.search).get(name); }
+    function formatTS(ts) {
+      try {
+        if (!ts) return '';
+        const date = (typeof ts.toDate === 'function') ? ts.toDate() : new Date(ts);
+        return date.toLocaleString();
+      } catch (e) { return ''; }
+    }
+
+    requireAuth(async (u) => {
+      me = u;
+      classId = getParam('classId') || getParam('id');
+      if (!classId) {
+        alert('No class selected. Open this page from the dashboard with ?classId=CLASS_ID');
+        $('#classMeta').textContent = 'No class selected';
+        return;
+      }
+      classRef = doc(db, 'classes', classId);
+      await loadClassMeta();
+
+      // determine reply permission: class creator OR user role faculty/hod/admin/teacher
+      try {
+        const userSnap = await getDoc(doc(db, 'users', me.uid));
+        const udata = userSnap.exists() ? userSnap.data() : {};
+        const role = (udata.role || '').toString().toLowerCase();
+        canReply = (me.uid === classData.creator) || ['faculty', 'hod', 'admin', 'teacher'].includes(role);
+      } catch (e) {
+        console.warn('could not determine user role', e);
+        canReply = (me.uid === classData.creator);
+      }
+
+      wireForms();
+      initWatchers();
+    });
+
+    async function loadClassMeta() {
+      const snap = await getDoc(classRef);
+      if (!snap.exists()) { alert('Class not found'); return; }
+      classData = snap.data();
+      $('#classTitle').textContent = classData.name || 'Classroom';
+      $('#classMeta').textContent = `Code: ${classData.code} · Members: ${(classData.members || []).length}`;
+      loadStudents(); // initial
+    }
+
+    function wireForms() {
+      // Notices
+      $('#classNoticeForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const title = $('#cNoticeTitle').value.trim();
+        const message = $('#cNoticeMsg').value.trim();
+        const file = $('#cNoticeFile').files[0];
+        if (!title || !message) return alert('Fill all fields');
+        let fileURL = '', fileName = '';
+        if (file) {
+          if (!file.type.includes('image') && !file.type.includes('pdf')) {
+            return alert('Only images or pdf files allowed');
+          }
+          const ref = sRef(storage, `classes/${classId}/notices/${Date.now()}_${file.name}`);
+          const up = await uploadBytesResumable(ref, file);
+          fileURL = await getDownloadURL(up.ref);
+          fileName = file.name;
+        }
+        await addDoc(collection(db, 'classes', classId, 'notices'), {
+          title, message, fileURL, fileName, authorId: me.uid, authorEmail: me.email, createdAt: serverTimestamp()
+        });
+        alert('Notice posted');
+        e.target.reset();
+        // open notices tab
+        $$('[data-tab]').forEach(x => x.classList.toggle('active', x.getAttribute('data-tab') === 'notices'));
+        document.getElementById('sec-notices').style.display = 'block';
+        ['questions', 'notes', 'assignments', 'submissions', 'students'].forEach(k => { const el = document.getElementById('sec-' + k); if (el) el.style.display = 'none'; });
+      });
+      $('#cancelNotice').addEventListener('click', () => $('#classNoticeForm').reset());
+
+      // Notes upload
+      $('#notesUploadForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const title = $('#noteTitle').value.trim();
+        const desc = $('#noteDesc').value.trim();
+        const file = $('#noteFile').files[0];
+        if (!title || !file) return alert('Add title and choose a file');
+        const path = `classes/${classId}/notes/${Date.now()}_${file.name}`;
+        const ref = sRef(storage, path);
+        const up = await uploadBytesResumable(ref, file);
+        const url = await getDownloadURL(up.ref);
+        await addDoc(collection(db, 'classes', classId, 'notes'), {
+          title, description: desc, fileURL: url, fileName: file.name,
+          uploaderId: me.uid, uploaderEmail: me.email || '', createdAt: serverTimestamp()
+        });
+        alert('Note uploaded');
+        e.target.reset();
+        // show notes tab
+        $$('[data-tab]').forEach(x => x.classList.toggle('active', x.getAttribute('data-tab') === 'notes'));
+        document.getElementById('sec-notes').style.display = 'block';
+        ['questions', 'notices', 'assignments', 'submissions', 'students'].forEach(k => { const el = document.getElementById('sec-' + k); if (el) el.style.display = 'none'; });
+      });
+      $('#cancelNoteUpload').addEventListener('click', () => $('#notesUploadForm').reset());
+
+      // Assignments
+      $('#assignmentForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const title = $('#assignTitle').value.trim();
+        const desc = $('#assignDesc').value.trim();
+        const due = $('#assignDue').value || null;
+        const file = $('#assignFile').files[0];
+        if (!title) return alert('Please add a title');
+        let fileURL = '', fileName = '';
+        if (file) {
+          const ref = sRef(storage, `classes/${classId}/assignments/${Date.now()}_${file.name}`);
+          const up = await uploadBytesResumable(ref, file);
+          fileURL = await getDownloadURL(up.ref);
+          fileName = file.name;
+        }
+        await addDoc(collection(db, 'classes', classId, 'assignments'), {
+          title, description: desc, dueDate: due, fileURL, fileName, postedBy: me.uid, createdAt: serverTimestamp()
+        });
+        alert('Assignment posted');
+        e.target.reset();
+        // open assignments view
+        $$('[data-tab]').forEach(x => x.classList.toggle('active', x.getAttribute('data-tab') === 'assignments'));
+        document.getElementById('sec-assignments').style.display = 'block';
+        ['questions', 'notices', 'notes', 'submissions', 'students'].forEach(k => { const el = document.getElementById('sec-' + k); if (el) el.style.display = 'none'; });
+      });
+      $('#cancelAssignment').addEventListener('click', () => $('#assignmentForm').reset());
+
+      // Submit form for students (question/submission)
+      const submitForm = document.getElementById('submitForm');
+      if (submitForm) {
+        submitForm.addEventListener('submit', async ev => {
+          ev.preventDefault();
+          const type = $('#submitType').value;
+          const title = $('#submitTitle').value.trim();
+          const msg = $('#submitMsg').value.trim();
+          const file = $('#submitFile').files[0];
+          if (!title || !msg) return alert('Please fill title and message');
+          let fileURL = '', fileName = '';
+          if (file) {
+            const path = `submissions/${classId}/${me.uid}_${Date.now()}_${file.name}`;
+            const ref = sRef(storage, path);
+            const up = await uploadBytesResumable(ref, file);
+            fileURL = await getDownloadURL(up.ref);
+            fileName = file.name;
+          }
+          if (type === 'question') {
+            await addDoc(collection(db, 'classes', classId, 'questions'), {
+              title, message: msg, fileURL, fileName,
+              studentUid: me.uid, studentEmail: me.email, studentName: me.displayName || '',
+              createdAt: serverTimestamp()
+            });
+            alert('Question posted');
+          } else {
+            await addDoc(collection(db, 'classes', classId, 'submissions'), {
+              title, message: msg, fileURL, fileName,
+              studentUid: me.uid, studentEmail: me.email, studentName: me.displayName || '',
+              createdAt: serverTimestamp()
+            });
+            alert('Submission posted');
+          }
+          submitForm.reset();
+        });
+      }
+    }
+
+    function initWatchers() {
+      // QUESTIONS — newest first, show title and message, scrollable
+      onSnapshot(query(collection(db, 'classes', classId, 'questions'), orderBy('createdAt', 'desc')), snap => {
+        const c = $('#questionsArea'); c.innerHTML = '';
+        if (snap.empty) { c.innerHTML = '<div class="muted">No questions yet.</div>'; return; }
+        snap.forEach(async docSnap => {
+          const q = docSnap.data();
+          const qid = docSnap.id;
+          const div = document.createElement('div'); div.className = 'list-item';
+
+          // title + message
+          const titleHtml = `<div class="question-title">${q.title || '(No title)'}</div>`;
+          const msgHtml = `<div style="margin-top:4px;">${q.message || ''}</div>`;
+          const fileHtml = q.fileURL ? `<div style="margin-top:8px;"><a href="${q.fileURL}" target="_blank" rel="noopener">📎 ${q.fileName || 'Attachment'}</a></div>` : '';
+          const metaHtml = `<div class="muted" style="margin-top:8px;">Asked: ${formatTS(q.createdAt)} • ${q.studentName || q.studentEmail || 'Student'}</div>`;
+
+          div.innerHTML = titleHtml + msgHtml + fileHtml + metaHtml;
+
+          // if reply exists — show readonly reply block
+          if (q.reply) {
+            const replyDiv = document.createElement('div');
+            replyDiv.className = 'reply-text';
+            replyDiv.innerHTML = `<strong>Reply:</strong><div style="margin-top:6px;">${q.reply}</div>
+              <div class="muted" style="margin-top:6px;">Replied: ${formatTS(q.repliedAt)}${q.repliedBy ? ' • by ' + (q.repliedBy === me.uid ? 'you' : q.repliedBy) : ''}</div>`;
+            div.appendChild(replyDiv);
+          } else {
+            // no reply yet — if current user can reply, show input + button (one-time reply enforced)
+            if (canReply) {
+              const row = document.createElement('div');
+              row.className = 'reply-row';
+              const inp = document.createElement('input');
+              inp.type = 'text';
+              inp.placeholder = 'Write a reply...';
+              inp.maxLength = 2000;
+              inp.setAttribute('aria-label', 'Reply input');
+
+              const btn = document.createElement('button');
+              btn.className = 'btn';
+              btn.textContent = 'Reply';
+              btn.addEventListener('click', async () => {
+                const text = inp.value.trim();
+                if (!text) return alert('Please type a reply.');
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+                try {
+                  // ensure reply wasn't added by someone else in the meantime
+                  const qSnap = await getDoc(doc(db, 'classes', classId, 'questions', qid));
+                  if (qSnap.exists() && qSnap.data().reply) {
+                    alert('A reply was already posted by someone else.');
+                    return;
+                  }
+                  await updateDoc(doc(db, 'classes', classId, 'questions', qid), {
+                    reply: text,
+                    repliedBy: me.uid,
+                    repliedAt: serverTimestamp()
+                  });
+                  // snapshot listener will refresh UI; optionally show success
+                } catch (err) {
+                  console.error('reply failed', err);
+                  alert('Failed to send reply: ' + (err.message || err));
+                } finally {
+                  // re-enable briefly — snapshot will update interface
+                  btn.disabled = false;
+                  btn.textContent = 'Reply';
+                }
+              });
+
+              row.appendChild(inp);
+              row.appendChild(btn);
+              div.appendChild(row);
+            } else {
+              const note = document.createElement('div');
+              note.className = 'muted';
+              note.style.marginTop = '8px';
+              note.textContent = 'No reply yet.';
+              div.appendChild(note);
+            }
+          }
+
+          c.appendChild(div);
+        });
+      });
+
+      // NOTICES (most recent first)
+      onSnapshot(query(collection(db, 'classes', classId, 'notices'), orderBy('createdAt', 'desc')), snap => {
+        const el = $('#classNoticesList'); el.innerHTML = '';
+        if (snap.empty) { el.innerHTML = '<div class="muted">No notices yet.</div>'; return; }
+        snap.forEach(d => {
+          const n = d.data();
+          const div = document.createElement('div'); div.className = 'list-item';
+          div.innerHTML = `<strong>${n.title}</strong>
+            <div class="muted" style="margin-top:6px;">${formatTS(n.createdAt)}${n.authorEmail ? ' • ' + n.authorEmail : ''}</div>
+            <div style="margin-top:8px;">${n.message}</div>
+            ${n.fileURL ? `<div style="margin-top:8px;"><a href="${n.fileURL}" target="_blank" rel="noopener">📎 ${n.fileName || 'Attachment'}</a></div>` : ''}`;
+          el.appendChild(div);
+        });
+      });
+
+      // NOTES cache + render
+      const notesQ = query(collection(db, 'classes', classId, 'notes'), orderBy('createdAt', 'desc'));
+      onSnapshot(notesQ, snap => {
+        notesCache = [];
+        snap.forEach(d => {
+          const n = d.data();
+          notesCache.push({ id: d.id, ...n });
+        });
+        renderNotes();
+      });
+
+      // ASSIGNMENTS
+      onSnapshot(query(collection(db, 'classes', classId, 'assignments'), orderBy('createdAt', 'desc')), snap => {
+        const el = $('#assignmentsList'); el.innerHTML = '';
+        if (snap.empty) { el.innerHTML = '<div class="muted">No assignments yet.</div>'; return; }
+        snap.forEach(aDoc => {
+          const a = aDoc.data();
+          const div = document.createElement('div'); div.className = 'list-item';
+          div.innerHTML = `<strong>${a.title}</strong>
+            <div class="muted" style="margin-top:6px;">Posted: ${formatTS(a.createdAt)}${a.dueDate ? ' • Due: ' + a.dueDate : ''}</div>
+            <div style="margin-top:8px;">${a.description || ''}</div>
+            ${a.fileURL ? `<div style="margin-top:8px;"><a href="${a.fileURL}" target="_blank" rel="noopener">📎 ${a.fileName || 'Attachment'}</a></div>` : ''}`;
+          el.appendChild(div);
+        });
+      });
+
+      // SUBMISSIONS (flat)
+      onSnapshot(query(collection(db, 'classes', classId, 'submissions'), orderBy('createdAt', 'desc')), snap => {
+        const el = $('#submissionsArea'); el.innerHTML = '';
+        if (snap.empty) { el.innerHTML = '<div class="muted">No submissions.</div>'; return; }
+        snap.forEach(sDoc => {
+          const s = sDoc.data();
+          const div = document.createElement('div'); div.className = 'list-item';
+          div.innerHTML = `<strong>${s.studentName || s.studentEmail}</strong>
+            <div class="muted" style="margin-top:6px;">Submitted: ${formatTS(s.createdAt)}</div>
+            <div style="margin-top:6px;">${s.title ? `<strong>${s.title}</strong><br>` : ''}${s.message || ''}</div>
+            ${s.fileURL ? `<div style="margin-top:8px;"><a href="${s.fileURL}" target="_blank" rel="noopener">📎 View Submission</a></div>` : ''}`;
+          el.appendChild(div);
+        });
+      });
+
+      // STUDENTS — watch class doc for changes to members
+      onSnapshot(classRef, snap => {
+        if (!snap.exists()) return;
+        classData = snap.data();
+        $('#classMeta').textContent = `Code: ${classData.code} · Members: ${(classData.members || []).length}`;
+        loadStudents(); // refresh student list when class doc changes
+      });
+    }
+
+    // Render notes using notesCache and current sort
+    function renderNotes() {
+      const el = $('#notesList'); el.innerHTML = '';
+      const sort = $('#notesSort')?.value || 'desc';
+      if (!notesCache || notesCache.length === 0) { el.innerHTML = '<div class="muted">No notes uploaded yet.</div>'; return; }
+      const arr = [...notesCache];
+      arr.sort((a, b) => {
+        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return (sort === 'asc') ? (ta - tb) : (tb - ta);
+      });
+      arr.forEach(n => {
+        const div = document.createElement('div'); div.className = 'list-item';
+        div.innerHTML = `<strong>${n.title}</strong>
+          <div class="muted" style="margin-top:6px;">${formatTS(n.createdAt)}${n.uploaderEmail ? ' • ' + n.uploaderEmail : ''}</div>
+          <div style="margin-top:8px;">${n.description ? n.description + '<br>' : ''}${n.fileName ? `<em>File:</em> ${n.fileName}` : ''}</div>
+          ${n.fileURL ? `<div style="margin-top:8px;"><a href="${n.fileURL}" target="_blank" rel="noopener">⬇ Download</a></div>` : ''}`;
+        el.appendChild(div);
+      });
+    }
+
+    // Sort control hook
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'notesSort') renderNotes();
+    });
+
+    // load students list and show remove button
+    async function loadStudents() {
+      const el = $('#studentsArea'); el.innerHTML = '';
+      if (!classData) { el.innerHTML = '<div class="muted">No data.</div>'; return; }
+      const members = classData.members || [];
+      if (members.length === 0) { el.innerHTML = '<div class="muted">No students joined yet.</div>'; return; }
+
+      // fetch user docs in parallel
+      const userPromises = members.map(id => getDoc(doc(db, 'users', id)).then(s => ({ id, data: s.exists() ? s.data() : null })).catch(() => ({ id, data: null })));
+      const results = await Promise.all(userPromises);
+
+      el.innerHTML = '';
+      results.forEach(r => {
+        const u = r.data || { name: 'Unknown', email: '—' };
+        const div = document.createElement('div'); div.className = 'list-item';
+        div.innerHTML = `<strong>${u.name || u.displayName || 'Student'}</strong>
+          <div class="muted" style="margin-top:6px;">${u.email || '—'}</div>
+          <div style="margin-top:8px;"><button class="btn danger removeBtn" data-id="${r.id}">Remove</button></div>`;
+        el.appendChild(div);
+      });
+
+      // attach remove handlers
+      $$('.removeBtn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          if (!confirm('Remove this student from the class?')) return;
+          const updated = (classData.members || []).filter(m => m !== id);
+          await updateDoc(classRef, { members: updated });
+          alert('Student removed.');
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>

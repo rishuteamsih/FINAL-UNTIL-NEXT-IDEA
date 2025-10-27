@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>All Test Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            background: #f9f9f9;
+            color: #111;
+            padding: 20px;
+        }
+
+        header {
+            background: #0b6fa4;
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+
+        .card {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+        }
+
+        input {
+            display: block;
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        .btn {
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 8px 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 4px;
+        }
+
+        .btn.primary {
+            background: #007acc;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background: #e0e0e0;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .green {
+            color: green;
+        }
+
+        .red {
+            color: red;
+        }
+
+        .gray {
+            color: gray;
+        }
+
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #f0f8ff;
+        }
+    </style>
+</head>
+
+<body>
+    <header>📊 All Test Results</header>
+
+    <div class="card">
+        <h2>Enter Your Roll Number</h2>
+        <input id="studentId" placeholder="Roll Number / ID" />
+        <button class="btn primary" id="loadBtn">Load My Results</button>
+        <div id="loadError" style="color:red;"></div>
+    </div>
+
+    <div class="card" id="resultsSection" style="display:none;">
+        <h2>Test History</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Test Title</th>
+                    <th>Status</th>
+                    <th>Result</th>
+                    <th>Score</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="resultsTable"></tbody>
+        </table>
+        <div id="detailsSection"></div>
+    </div>
+
+    <!-- Use the same Firebase project as the Teacher Panel -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script>
+        // SAME CONFIG AS TEACHER PANEL (smart-timetable-266fe)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFKmM22FUSQPYy-eMsBzcZN3bmAxglXl0",
+            authDomain: "smart-timetable-266fe.firebaseapp.com",
+            projectId: "smart-timetable-266fe",
+            storageBucket: "smart-timetable-266fe.appspot.com",
+            messagingSenderId: "843230713835",
+            appId: "1:843230713835:web:b97d024f4fcf9a40ceabae",
+            measurementId: "G-DDY9NVEK8R"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let allTests = {};
+        let allResponses = {}; // keyed by testId
+
+        async function loadResults() {
+            const sid = (document.getElementById("studentId").value || "").trim();
+            const errorBox = document.getElementById("loadError");
+            errorBox.textContent = "";
+            if (!sid) {
+                errorBox.textContent = "Please enter your roll number.";
+                return;
+            }
+
+            // Get all tests
+            const testSnap = await db.collection("tests").get();
+
+            // Get responses by studentId OR rollNo (merge results)
+            const [byIdSnap, byRollSnap] = await Promise.all([
+                db.collection("responses").where("studentId", "==", sid).get().catch(() => ({ empty: true, docs: [] })),
+                db.collection("responses").where("rollNo", "==", sid).get().catch(() => ({ empty: true, docs: [] }))
+            ]);
+
+            allTests = {};
+            allResponses = {};
+            const addResp = (doc) => {
+                const data = doc.data();
+                if (data && data.testId) allResponses[data.testId] = data;
+            };
+            byIdSnap.docs.forEach(addResp);
+            byRollSnap.docs.forEach(addResp);
+
+            const table = document.getElementById("resultsTable");
+            table.innerHTML = "";
+
+            testSnap.docs.forEach(doc => {
+                const test = doc.data() || {};
+                const testId = doc.id;
+                allTests[testId] = test;
+
+                const response = allResponses[testId];
+
+                const attended = response ? "🟢 Attended" : "🔴 Not Attended";
+                const resultsPublished = Boolean(test.resultsPublished);
+                const resultStatus = resultsPublished ? "✅ Published" : "❌ Not Yet";
+
+                // Score:
+                let score = "—";
+                if (response && resultsPublished) {
+                    // Prefer the scores written by the Teacher Panel
+                    const auto = Number(response.autoScore || 0);
+                    const manual = Number(response.manualScore || 0);
+                    if (auto || manual || response.totalPossible) {
+                        const total = Number(response.totalPossible || (auto + manual));
+                        score = `${auto + manual}/${total || (auto + manual)}`;
+                    } else {
+                        // Fallback: compute MCQ-only from questions/answers
+                        const answers = response.answers || {};
+                        const questions = test.questions || [];
+                        let totalMarks = 0, scored = 0;
+                        questions.forEach((q, i) => {
+                            const correct = (q.answer || "").trim().toLowerCase();
+                            const given = (answers["q" + i] || "").trim().toLowerCase();
+                            const marks = Number(q.marks || 0);
+                            totalMarks += marks;
+                            if (q.type === "mcq" && correct && given && correct === given) scored += marks;
+                        });
+                        score = `${scored}/${totalMarks || 0}`;
+                    }
+                }
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+          <td>${test.title || "(Untitled Test)"}<br><span style="font-size:12px;color:#666">${testId}</span></td>
+          <td class="status ${attended.includes("Attended") ? 'green' : 'red'}">${attended}</td>
+          <td class="status ${resultStatus.includes("Published") ? 'green' : 'gray'}">${resultStatus}</td>
+          <td>${score}</td>
+          <td><button class="btn" onclick="viewDetails('${testId}')">View</button></td>
+        `;
+                table.appendChild(row);
+            });
+
+            document.getElementById("resultsSection").style.display = "block";
+        }
+
+        function viewDetails(testId) {
+            const test = allTests[testId] || {};
+            const response = allResponses[testId];
+            const container = document.getElementById("detailsSection");
+            container.innerHTML = `<h3>${test.title || "(Untitled Test)"} — Details</h3>`;
+
+            if (!response) {
+                container.innerHTML += `<p class="red">You did not attend this test.</p>`;
+                return;
+            }
+
+            if (!test.resultsPublished) {
+                container.innerHTML += `<p class="gray">Results are not yet published.</p>`;
+                return;
+            }
+
+            const answers = response.answers || {};
+            const questions = test.questions || [];
+            if (!questions.length) {
+                container.innerHTML += `<p class="gray">No question breakdown available.</p>`;
+                return;
+            }
+
+            questions.forEach((q, i) => {
+                const studentAnswer = answers["q" + i] || "";
+                const correctAnswer = q.answer || "";
+                const isCorrect = (q.type === "mcq")
+                    ? studentAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
+                    : null; // text questions are manually graded
+                const marks = Number(q.marks || 0);
+
+                const div = document.createElement("div");
+                div.className = "result";
+                div.innerHTML = `
+          <strong>Q${i + 1} (${marks} marks):</strong> ${q.text || ""}<br>
+          <span><strong>Your Answer:</strong> ${studentAnswer || "<em>—</em>"}</span><br>
+          ${q.type === "mcq" ? `<span><strong>Correct Answer:</strong> ${correctAnswer || "<em>—</em>"}</span><br>` : ``}
+          ${q.type === "mcq"
+                        ? `<span class="${isCorrect ? 'green' : 'red'}"><strong>${isCorrect ? '✔ Correct' : '✘ Incorrect'}</strong></span>`
+                        : `<span class="gray"><strong>Manually graded question</strong></span>`
+                    }
+        `;
+                container.appendChild(div);
+            });
+
+            container.scrollIntoView({ behavior: "smooth" });
+        }
+
+        // Wire button
+        document.getElementById("loadBtn").addEventListener("click", loadResults);
+    </script>
+</body>
+
+</html>
